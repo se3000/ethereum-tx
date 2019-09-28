@@ -8,3 +8,8 @@
 /spec/reports/
 /tmp/
 .ruby-version
+
+# Emacs
+*~
+\#*\#
+.\#*

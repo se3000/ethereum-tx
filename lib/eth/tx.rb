@@ -79,7 +79,7 @@ module Eth
 
     def from
       if ecdsa_signature
-        public_key = OpenSsl.recover_compact(signature_hash, ecdsa_signature)
+        public_key = Key.recover_public_key(signature_hash, ecdsa_signature)
         Utils.public_key_to_address(public_key) if public_key
       end
     end

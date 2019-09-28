@@ -27,8 +27,6 @@ describe Eth::Key, type: :model do
       10.times do
         signature = key.sign message
         expect(key.verify_signature message, signature).to be_truthy
-        s_value = Eth::Utils.v_r_s_for(signature).last
-        expect(s_value).to be < (Eth::Secp256k1::N/2)
       end
     end
   end
@@ -74,11 +72,13 @@ describe Eth::Key, type: :model do
       end
     end
 
-    context "when the signature does not match any public key" do
+    context "when the signature is invalid" do
       let(:signature) { hex_to_bin "1b21a66b" }
 
-      it "signs a message so that the public key is recoverable" do
-        expect(key.verify_signature message, signature).to be_falsy
+      it "raises an error" do
+        expect do
+          key.verify_signature(message, signature)
+        end.to raise_error(::Secp256k1::Error)
       end
     end
   end

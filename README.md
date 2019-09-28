@@ -142,4 +142,3 @@ The gem is available as open source under the terms of the [MIT License](http://
 
 * Better test suite.
 * Expose API for HD keys.
-* Support signing with [libsecp256k1](https://github.com/bitcoin-core/secp256k1).

@@ -2,16 +2,18 @@ require 'digest/sha3'
 require 'ffi'
 require 'money-tree'
 require 'rlp'
+require 'rbsecp256k1'
 
 module Eth
   BYTE_ZERO = "\x00".freeze
   UINT_MAX = 2**256 - 1
 
   autoload :Address, 'eth/address'
+  autoload :Chains, 'eth/chains'
   autoload :Gas, 'eth/gas'
   autoload :Key, 'eth/key'
-  autoload :OpenSsl, 'eth/open_ssl'
-  autoload :Secp256k1, 'eth/secp256k1'
+  autoload :PersonalMessage, 'eth/personal_message'
+  autoload :RecoverableSignature, 'eth/recoverable_signature'
   autoload :Sedes, 'eth/sedes'
   autoload :Tx, 'eth/tx'
   autoload :Utils, 'eth/utils'

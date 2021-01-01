@@ -20,6 +20,12 @@ Or install it yourself as:
 
 ## Usage
 
+First of all, require this gem:
+
+```ruby
+require 'eth'
+```
+
 ### Keys
 
 Create a new public/private key and get its address:
@@ -49,18 +55,34 @@ You can also encrypt your keys for use with other ethereum libraries:
 encrypted_key_info = Eth::Key.encrypt key, 'p455w0rD'
 ```
 
-### Transactions
+### How to make a trasaction?
 
-Build a transaction from scratch:
+Let's take an example of sending ETH to another address:
+
+Step1. Build a transaction from scratch:
 
 ```ruby
 tx = Eth::Tx.new({
-  data: hex_data,
+
+  # 0x00 or something else
+  data: "0x00",
+
+  # 21000 for sending eth, and 50_000 or more for sending erc-20 tokens.
   gas_limit: 21_000,
-  gas_price: 3_141_592,
-  nonce: 1,
-  to: key2.address,
-  value: 1_000_000_000_000,
+
+  # assume current fast price is 50 gwei
+  gas_price: (50 * 1e9).to_i,
+
+  # you must get the correct nonce for the "from address", otherwise
+  # the signed-tx will NOT be broadcasted
+  # you can query the nonce from interface such as infura's `eth_getTransactionCount`
+  nonce: 0,
+
+  # this is where the crypto will be sent to
+  to: "0x3Ae7a18407B17037B2ECC4901c1b77Db9836888",
+
+  # let us send 0.12 ETH
+  value: (BigDecimal("0.12") * 1e18).to_i
 })
 ```
 
@@ -70,13 +92,57 @@ Or decode an encoded raw transaction:
 tx = Eth::Tx.decode hex
 ```
 
-Then sign the transaction:
+Step2. Then sign the transaction with your private key:
 
 ```ruby
-tx.sign key
+
+# step 2.1 get the private key of the "from address"
+from_address_json_file = './from_address_json'
+from_address_password = 'p455w0rD'
+the_private_key = Eth::Key.decrypt File.read(from_address_json_file), from_address_password
+
+# step 2.2 sign the tx with private key
+
+tx.sign the_private_key
 ```
 
-Get the raw transaction with `tx.hex`, and broadcast it through any Ethereum node. Or, just get the TXID with `tx.hash`.
+Step3. Get the raw transaction( signed transaction) with:
+
+```ruby
+
+# will return a hex value with length 200+, depends on `data` parameter
+tx.hex
+
+# e.g.  =>  0xf86c82039585174876e800825208943ae7a18407b17037b2ecc4901c1b77db98367cda866d23ad5f80008026a085b81f23b7e80c65f6e8d97f2c6482c0cc7d660fc538f566c47c22e57c841726a07351fe455188b160c726d3032d03ddcdf1929716bb1c5aa06274fdf2830b73ba
+```
+
+Step4. broadcast it through any Ethereum node, or third-party services ( like infura )
+
+```json
+curl https://mainnet.infura.io/v3/<YOUR-PROJECT-ID>
+  -X POST
+  -H "Content-Type: application/json"
+  -d '{
+        "jsonrpc":"2.0",
+        "method":"eth_sendRawTransaction",
+        "params":[
+          "0xf86c82039585174876e800825208943ae7a18407b17037b2ecc4901c1b77db98367cda866d23ad5f80008026a085b81f23b7e80c65f6e8d97f2c6482c0cc7d660fc538f566c47c22e57c841726a07351fe455188b160c726d3032d03ddcdf1929716bb1c5aa06274fdf2830b73ba"
+        ],
+        "id":1
+      }'
+```
+
+you will get result like:
+
+```json
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "result":"0x371c92a5815a734c6cd4c6e890e4b9216aa9eeee482b6a8279bea1bdeebc0d2d"
+}
+```
+
+Or, just get the TXID with `tx.hash`.
 
 ### Utils
 
